@@ -177,6 +177,22 @@ ul.clean li::before{content:">";position:absolute;left:0;color:var(--green);font
 .member .x{margin-left:auto;font-family:var(--mono);font-size:11px;border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:2px 7px;cursor:pointer;color:var(--ink-3)}
 .member .x:hover{color:var(--danger);border-color:var(--danger)}
 .who .names{display:inline-flex;gap:4px;flex-wrap:wrap;vertical-align:middle}
+.task{position:relative}
+.task label{flex:1;cursor:pointer}
+.task.done label{color:var(--ink-3);text-decoration:line-through}
+.task .acts{display:inline-flex;gap:2px;opacity:0;transition:opacity .15s}
+.task:hover .acts,.task:focus-within .acts{opacity:1}
+@media (hover:none){.task .acts{opacity:.7}}
+.tb{font-family:var(--mono);font-size:12px;line-height:1;border:1px solid var(--line);background:var(--bg);border-radius:5px;padding:2px 6px;cursor:pointer;color:var(--ink-3)}
+.tb:hover{color:var(--ink);border-color:var(--green)}
+.tb[data-act=del]:hover{color:var(--danger);border-color:var(--danger)}
+.addtask{align-self:start;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--green-2);background:none;border:1px dashed var(--line);border-radius:6px;padding:5px 10px;cursor:pointer;margin-top:4px}
+.addtask:hover{border-color:var(--green);background:var(--green-soft)}
+.tedit{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:6px 8px;border:1px solid var(--green);border-radius:6px;background:var(--bg-2)}
+.tedit input[type=text]{flex:1 1 180px;min-width:0;font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--ink)}
+.tedit select{font-family:var(--mono);font-size:12px;padding:6px 6px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--ink)}
+.tedit .tbtns{display:inline-flex;gap:4px}
+.tedit .btn{padding:5px 9px;font-size:11.5px}
 .suggest{margin-top:22px;padding:14px 18px;border-left:4px solid var(--green);background:var(--green-soft);border-radius:0 var(--radius) var(--radius) 0;color:var(--green-ink)}
 
 /* ---------- budget ---------- */
@@ -328,7 +344,7 @@ footer{max-width:1180px;margin:0 auto;padding:20px 16px 40px;font-family:var(--m
     <div class="panel">
       <h3>Cómo usar este panel</h3>
       <ul class="clean">
-        <li>Cada rol tiene su lista de tareas con la fase en la que toca hacerlas (T-8, T-4…); al tacharlas queda registrado quién y cuándo.</li>
+        <li>Cada rol tiene su lista de tareas con la fase en la que toca hacerlas (T-8, T-4…); al tacharlas queda registrado quién y cuándo. Pasa el ratón por una tarea para editarla (✎) o borrarla (×), y usa "+ añadir tarea" para crear nuevas.</li>
         <li>El presupuesto se recalcula con el número de participantes y las opciones que elijáis.</li>
         <li>El cronograma se ancla a la fecha del evento; lo que ya pasó se atenúa.</li>
         <li>Las decisiones abiertas están al final: cada una tiene un responsable de cerrarla.</li>
@@ -571,7 +587,9 @@ try{const s=JSON.parse(localStorage.getItem(LKEY));if(s&&typeof s==='object')loc
 function saveLocal(){try{localStorage.setItem(LKEY,JSON.stringify(local));}catch(e){}}
 /* estado común (viene de Firebase, igual para todos) */
 const DEFAULT_BUDGET={nPart:50,nPodios:1,cont:10,opts:{}};
-let S={date:'',members:{},done:{},notes:'',budget:Object.assign({},DEFAULT_BUDGET)};
+let S={date:'',members:{},done:{},notes:'',tasks:null,budget:Object.assign({},DEFAULT_BUDGET)};
+const PHASES=['T-10','T-9','T-8','T-7','T-6','T-5','T-4','T-3','T-2','T-1','D','T+1','T+2'];
+let editing=null,seeding=false;
 let db=null,connected=false,ready=false,draft=[];
 
 const $=s=>document.querySelector(s);
@@ -586,6 +604,21 @@ const isMine=id=>myRoles().includes(id);
 const peopleIn=id=>members().filter(m=>rolesOf(m).includes(id)).map(m=>m.name);
 const eventDate=()=>S.date||'';
 const sameSet=(a,b)=>a.length===b.length&&a.every(x=>b.includes(x));
+/* tareas de un rol: las de Firebase si existen, si no las de partida del código */
+function tasksOf(r){
+  const t=S.tasks&&S.tasks[r.id];
+  if(t)return Object.entries(t).filter(([id,x])=>x&&x.text).map(([id,x])=>({id,text:x.text,phase:x.phase||'',order:+x.order||0})).sort((a,b)=>a.order-b.order||a.id.localeCompare(b.id));
+  return r.tasks.map((x,i)=>({id:'t'+i,text:x[0],phase:x[1],order:i}));
+}
+/* primera vez: copia las tareas de partida a Firebase (transacción: solo si aún no hay) */
+function seedTasks(){
+  if(!db||S.tasks)return Promise.resolve();
+  const seed={};ROLES.forEach(r=>{seed[r.id]={};r.tasks.forEach((t,i)=>{seed[r.id]['t'+i]={text:t[0],phase:t[1],order:i};});});
+  return db.ref(ROOT+'/tasks').transaction(cur=>cur===null?seed:undefined).then(()=>{
+    const upd={};Object.keys(S.done||{}).forEach(k=>{const m=k.match(/^([a-z]+)_(\d+)$/);if(m){upd[m[1]+'_t'+m[2]]=S.done[k];upd[k]=null;}});
+    if(Object.keys(upd).length)return db.ref(ROOT+'/done').update(upd);
+  }).catch(()=>{});
+}
 
 /* ================= FIREBASE ================= */
 function setConn(txt){
@@ -607,7 +640,8 @@ function connectFirebase(){
     db.ref('.info/connected').on('value',s=>{connected=!!s.val();setConn();});
     db.ref(ROOT).on('value',snap=>{
       const v=snap.val()||{};
-      S={date:v.date||'',members:v.members||{},done:v.done||{},notes:v.notes||'',budget:Object.assign({},DEFAULT_BUDGET,v.budget||{})};
+      S={date:v.date||'',members:v.members||{},done:v.done||{},notes:v.notes||'',tasks:v.tasks||null,budget:Object.assign({},DEFAULT_BUDGET,v.budget||{})};
+      if(!S.tasks&&!seeding){seeding=true;seedTasks();}
       S.budget.opts=S.budget.opts||{};
       if(!ready){ready=true;draft=[...myRoles()];}
       renderAll();
@@ -619,24 +653,31 @@ function connectFirebase(){
 /* ================= ROLES ================= */
 let filter='all';
 const fmtAt=t=>t?new Date(t).toLocaleDateString('es-ES',{day:'2-digit',month:'short'}):'';
+function editForm(){
+  const e=editing;
+  return `<div class="tedit"><input type="text" class="tetext" id="tetext" value="${esc(e.text)}" placeholder="Descripción de la tarea" maxlength="140"><select class="tephase" id="tephase" aria-label="fase">${PHASES.map(p=>`<option${p===e.phase?' selected':''}>${p}</option>`).join('')}</select><span class="tbtns"><button class="btn tsave">guardar</button><button class="btn ghost tcancel">cancelar</button></span></div>`;
+}
 function renderRoles(){
   const box=$('#roleGrid');box.innerHTML='';
   const ordered=[...ROLES].sort((a,b)=>(isMine(b.id)?1:0)-(isMine(a.id)?1:0));
   ordered.forEach(r=>{
-    const total=r.tasks.length,done=r.tasks.filter((t,i)=>S.done[r.id+'_'+i]).length;
+    const ts=tasksOf(r);
+    const total=ts.length,done=ts.filter(t=>S.done[r.id+'_'+t.id]).length;
     if(filter==='def'&&r.proposed)return;
     if(filter==='prop'&&!r.proposed)return;
     if(filter==='pending'&&done===total)return;
     const who=peopleIn(r.id);
     const el=document.createElement('article');
     el.className='role'+(r.proposed?' proposed':'')+(isMine(r.id)?' mine':'');
+    const isEd=(id)=>editing&&editing.role===r.id&&editing.id===id;
     el.innerHTML=`<div class="head"><div class="code">${r.code}${r.proposed?' · PROPUESTO':''}</div>
       <h3>${esc(r.name)} ${r.proposed?'<span class="pill warn">propuesto</span>':'<span class="pill green">definido</span>'}${isMine(r.id)?'<span class="pill black">tú</span>':''}</h3>
       <div class="who">Responsables: ${who.length?'<span class="names">'+who.map(n=>'<span class="pill green">'+esc(n)+'</span>').join('')+'</span>':'<b>por asignar</b>'}</div></div>
       <p class="desc">${esc(r.desc)}</p>
       <div class="fn"><h4>Funciones</h4><ul class="clean small">${r.fns.map(f=>`<li>${esc(f)}</li>`).join('')}</ul></div>
       <div class="tasks"><h4 class="fn" style="padding:0;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:6px 0 2px">Tareas</h4>
-      ${r.tasks.map((t,i)=>{const k=r.id+'_'+i,d=S.done[k];return `<label class="task${d?' done':''}"><input type="checkbox" id="chk-${k}" data-k="${k}" ${d?'checked':''}><span>${esc(t[0])}</span><span class="tag">${d?'✓ '+esc(d.by||'alguien')+(d.at?' · '+fmtAt(d.at):''):esc(t[1])}</span></label>`;}).join('')}</div>
+      ${ts.map(t=>{if(isEd(t.id))return editForm();const k=r.id+'_'+t.id,d=S.done[k];return `<div class="task${d?' done':''}"><input type="checkbox" id="chk-${k}" data-k="${k}" ${d?'checked':''}><label for="chk-${k}">${esc(t.text)}</label><span class="tag">${d?'✓ '+esc(d.by||'alguien')+(d.at?' · '+fmtAt(d.at):''):esc(t.phase)}</span><span class="acts"><button class="tb" data-act="edit" data-r="${r.id}" data-id="${t.id}" title="editar">✎</button><button class="tb" data-act="del" data-r="${r.id}" data-id="${t.id}" title="borrar">×</button></span></div>`;}).join('')}
+      ${isEd('new')?editForm():`<button class="addtask" data-r="${r.id}">+ añadir tarea</button>`}</div>
       <div class="foot"><div class="progress"><div class="bar"><i style="width:${total?done/total*100:0}%"></i></div><span>${done}/${total}</span></div></div>`;
     box.appendChild(el);
   });
@@ -644,10 +685,37 @@ function renderRoles(){
     const k=e.target.dataset.k;
     write('done/'+k,e.target.checked?{by:local.name||'alguien',at:Date.now()}:null);
   }));
+  box.querySelectorAll('.addtask').forEach(b=>b.addEventListener('click',()=>{editing={role:b.dataset.r,id:'new',text:'',phase:'T-4'};renderRoles();}));
+  box.querySelectorAll('.tb').forEach(b=>b.addEventListener('click',()=>{
+    const r=ROLES.find(x=>x.id===b.dataset.r);const t=tasksOf(r).find(x=>x.id===b.dataset.id);if(!t)return;
+    if(b.dataset.act==='edit'){editing={role:r.id,id:t.id,text:t.text,phase:t.phase};renderRoles();return;}
+    if(!confirm('¿Borrar la tarea "'+t.text+'" para todo el equipo?'))return;
+    seedTasks().then(()=>{const upd={};upd['tasks/'+r.id+'/'+t.id]=null;upd['done/'+r.id+'_'+t.id]=null;return db?db.ref(ROOT).update(upd):null;}).then(()=>toast('tarea borrada')).catch(()=>toast('no se pudo borrar'));
+  }));
+  const te=box.querySelector('#tetext'),tp=box.querySelector('#tephase');
+  if(te){
+    te.addEventListener('input',e=>{editing.text=e.target.value;});
+    tp.addEventListener('change',e=>{editing.phase=e.target.value;});
+    te.addEventListener('keydown',e=>{if(e.key==='Enter')saveTask();if(e.key==='Escape'){editing=null;renderRoles();}});
+    box.querySelector('.tsave').addEventListener('click',saveTask);
+    box.querySelector('.tcancel').addEventListener('click',()=>{editing=null;renderRoles();});
+    if(editing&&!editing.focused){editing.focused=true;te.focus();}
+  }
   if(!box.children.length)box.innerHTML='<p class="muted">Nada que mostrar con este filtro.</p>';
 }
+function saveTask(){
+  if(!editing)return;
+  const e=editing,text=e.text.trim();
+  if(!text){toast('escribe la tarea');return;}
+  const r=ROLES.find(x=>x.id===e.role);
+  const id=e.id==='new'?'n'+Date.now().toString(36):e.id;
+  const cur=tasksOf(r).find(x=>x.id===id);
+  const order=cur?cur.order:tasksOf(r).reduce((m,x)=>Math.max(m,x.order),-1)+1;
+  editing=null;
+  seedTasks().then(()=>write('tasks/'+r.id+'/'+id,{text,phase:e.phase,order,by:local.name||'alguien',at:Date.now()},cur?'tarea actualizada':'tarea añadida'));
+}
 function renderGlobal(){
-  let t=0,d=0;ROLES.forEach(r=>r.tasks.forEach((x,i)=>{t++;if(S.done[r.id+'_'+i])d++;}));
+  let t=0,d=0;ROLES.forEach(r=>tasksOf(r).forEach(x=>{t++;if(S.done[r.id+'_'+x.id])d++;}));
   const p=t?Math.round(d/t*100):0;$('#barAll').style.width=p+'%';$('#pctAll').textContent=`${p} % · ${d}/${t}`;
 }
 document.querySelectorAll('.role-filter button').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;renderRoles();}));
