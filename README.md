@@ -1,5 +1,7 @@
 # COREBOOST · panel de organización (Core Dumped)
 
+Panel en vivo: https://coredumped-etsisi.github.io/2026-coreboost-panel/
+
 Panel interno para organizar **COREBOOST**, la competición de programación de la asociación Core Dumped (ETSISI, UPM).
 
 - Página: `index.html` (HTML estático, sin build).
