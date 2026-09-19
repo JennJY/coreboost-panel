@@ -593,7 +593,7 @@ function setConn(txt){
   el.classList.remove('on','off');
   if(txt){el.textContent=txt;el.classList.add('off');return;}
   if(connected){el.textContent='en directo';el.classList.add('on');}
-  else{el.textContent=ready?'sin conexión':'conectando...';el.classList.add(ready?'off':'');}
+  else{el.textContent=ready?'sin conexión':'conectando...';if(ready)el.classList.add('off');}
 }
 function write(path,val,msg){
   if(!db){toast('sin conexión: no se ha guardado');return Promise.resolve(false);}
