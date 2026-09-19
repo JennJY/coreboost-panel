@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>COREBOOST Core Dumped</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --bg:#ffffff;
+  --bg-2:#f3f7f4;
+  --bg-3:#e6efe9;
+  --ink:#0b0f0c;
+  --ink-2:#3d4a41;
+  --ink-3:#6b7a70;
+  --line:#d5e0d9;
+  --green:#16a34a;
+  --green-2:#0f7a37;
+  --green-soft:#dcf5e4;
+  --green-ink:#0b5c2a;
+  --black:#0b0f0c;
+  --on-black:#e8f5ec;
+  --phosphor:#3ddc84;
+  --warn:#b7791f;
+  --warn-soft:#fbf1dc;
+  --danger:#b3261e;
+  --danger-soft:#fbe3e1;
+  --shadow:0 10px 30px rgba(11,15,12,.08);
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:"Manrope",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b0f0c; --bg-2:#111813; --bg-3:#18231b;
+    --ink:#e8f5ec; --ink-2:#b5c9bb; --ink-3:#7f9487;
+    --line:#233129;
+    --green:#3ddc84; --green-2:#6ff0a6; --green-soft:#12301d; --green-ink:#9af2bf;
+    --black:#040604; --on-black:#e8f5ec;
+    --warn:#e6b45a; --warn-soft:#2e2412;
+    --danger:#f28b82; --danger-soft:#33191a;
+    --shadow:0 10px 30px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b0f0c; --bg-2:#111813; --bg-3:#18231b;
+  --ink:#e8f5ec; --ink-2:#b5c9bb; --ink-3:#7f9487;
+  --line:#233129;
+  --green:#3ddc84; --green-2:#6ff0a6; --green-soft:#12301d; --green-ink:#9af2bf;
+  --black:#040604; --on-black:#e8f5ec;
+  --warn:#e6b45a; --warn-soft:#2e2412;
+  --danger:#f28b82; --danger-soft:#33191a;
+  --shadow:0 10px 30px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--sans);font-size:15px;line-height:1.55;margin:0}
+h1,h2,h3,h4{margin:0;text-wrap:balance;line-height:1.15}
+p{margin:0}
+a{color:var(--green-2)}
+button{font:inherit;color:inherit}
+.mono{font-family:var(--mono)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--green-2);font-weight:700}
+.muted{color:var(--ink-3)}
+.small{font-size:13px}
+
+/* ---------- header ---------- */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--black);color:var(--on-black);border-bottom:2px solid var(--phosphor)}
+.topbar-in{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-weight:800;letter-spacing:.02em;white-space:nowrap}
+.brand .cursor{display:inline-block;width:.6em;height:1.05em;background:var(--phosphor);vertical-align:-.15em;animation:blink 1.1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+@media (prefers-reduced-motion: reduce){.brand .cursor{animation:none}}
+.brand .aso{color:var(--phosphor)}
+.brand .sep{color:#5c6f63;font-weight:400}
+.conn{font-family:var(--mono);font-size:11px;color:#7f9487;padding:3px 9px;border-radius:999px;border:1px solid #233129;white-space:nowrap}
+.conn::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#7f9487;margin-right:6px;vertical-align:1px}
+.conn.on{color:var(--phosphor);border-color:#2a4a36}
+.conn.on::before{background:var(--phosphor)}
+.conn.off{color:#e6b45a}
+.conn.off::before{background:#e6b45a}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+nav.tabs a{font-family:var(--mono);font-size:12.5px;color:#b5c9bb;text-decoration:none;padding:6px 10px;border-radius:6px;border:1px solid transparent}
+nav.tabs a:hover{color:#fff;background:#18231b}
+nav.tabs a.active{color:var(--phosphor);border-color:#2a4a36;background:#0f1a13}
+nav.tabs a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+
+/* ---------- hero ---------- */
+.hero{background:var(--black);color:var(--on-black);padding-block:34px 30px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:
+  repeating-linear-gradient(0deg,transparent 0 3px,rgba(61,220,132,.035) 3px 4px);pointer-events:none}
+.hero-in{max-width:1180px;margin:0 auto;padding:0 16px;display:grid;grid-template-columns:1.4fr 1fr;gap:28px;align-items:end;position:relative}
+.hero h1{font-family:var(--mono);font-size:clamp(34px,6vw,64px);font-weight:800;letter-spacing:-.02em;color:#fff}
+.hero h1 span{color:var(--phosphor)}
+.hero .lead{color:#b5c9bb;max-width:58ch;margin-top:12px;font-size:16px}
+.term{background:#040604;border:1px solid #233129;border-radius:8px;padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.7;color:#b5c9bb;box-shadow:0 0 0 1px rgba(61,220,132,.08),0 20px 40px rgba(0,0,0,.4)}
+.term .p{color:var(--phosphor)}
+.term .k{color:#fff}
+.term .c{color:#5c6f63}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.stat{border:1px solid #233129;border-radius:8px;padding:8px 12px;background:#0f1a13;min-width:110px}
+.stat b{display:block;font-family:var(--mono);font-size:20px;color:var(--phosphor);font-variant-numeric:tabular-nums}
+.stat span{font-size:11.5px;color:#7f9487;letter-spacing:.08em;text-transform:uppercase;font-family:var(--mono)}
+
+/* ---------- layout ---------- */
+main{max-width:1180px;margin:0 auto;padding:0 16px 80px}
+section.block{padding-block:44px 8px;scroll-margin-top:70px}
+section.block > header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:18px;border-bottom:2px solid var(--ink);padding-bottom:10px}
+section.block > header h2{font-family:var(--mono);font-size:24px;font-weight:800;letter-spacing:-.01em}
+section.block > header .sub{color:var(--ink-3);font-size:14px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:900px){.g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-in{grid-template-columns:1fr}}
+@media (max-width:600px){.g2,.g3,.g4{grid-template-columns:1fr}}
+.panel{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+.panel h3{font-size:15px;font-weight:800;margin-bottom:8px}
+.pill{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;padding:2px 8px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink-2);white-space:nowrap}
+.pill.green{background:var(--green-soft);color:var(--green-ink);border-color:transparent}
+.pill.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.pill.black{background:var(--black);color:var(--phosphor);border-color:transparent}
+ul.clean{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+ul.clean li{padding-left:18px;position:relative}
+ul.clean li::before{content:">";position:absolute;left:0;color:var(--green);font-family:var(--mono);font-weight:700}
+
+/* ---------- progress ---------- */
+.progress{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+.bar{flex:1;height:8px;background:var(--bg-3);border-radius:999px;overflow:hidden;min-width:60px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--phosphor));width:0;transition:width .3s}
+@media (prefers-reduced-motion: reduce){.bar i{transition:none}}
+
+/* ---------- roles ---------- */
+.roles{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+@media (max-width:420px){.roles{grid-template-columns:1fr}}
+.role{background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.role.proposed{border-style:dashed}
+.role > .head{padding:14px 16px 12px;border-bottom:1px solid var(--line);background:var(--bg-2)}
+.role .code{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.08em}
+.role h3{font-size:18px;font-weight:800;margin:4px 0 4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.role .who{font-size:13px;color:var(--ink-2)}
+.role .who b{color:var(--ink)}
+.role .desc{padding:12px 16px 0;color:var(--ink-2);font-size:14px}
+.role .fn{padding:10px 16px 0}
+.role .fn h4{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.role .tasks{padding:10px 16px 14px;display:grid;gap:4px;margin-top:auto}
+.task{display:flex;align-items:flex-start;gap:9px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:14px}
+.task:hover{background:var(--bg-2)}
+.task input{margin:4px 0 0;accent-color:var(--green);flex:none}
+.task.done span{color:var(--ink-3);text-decoration:line-through}
+.task .tag{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);white-space:nowrap;padding-top:3px}
+.role .foot{padding:8px 16px 12px;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.role .foot .progress{flex:1}
+.mine{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft),var(--shadow)}
+.role-filter{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px;font-size:13px}
+.role-filter select,.ctl input[type=date],.ctl input[type=number],.ctl select,textarea{font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--bg);cursor:pointer;user-select:none}
+.chip input{position:absolute;opacity:0;width:0;height:0}
+.chip.on{background:var(--black);color:var(--phosphor);border-color:var(--black)}
+.chip:hover{border-color:var(--green)}
+.chip:focus-within{outline:2px solid var(--green);outline-offset:2px}
+.shared-tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--green-ink);background:var(--green-soft);padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:middle}
+.shared-tag.local{color:var(--warn);background:var(--warn-soft)}
+.me-form{display:grid;gap:8px;margin-top:6px}
+.me-form select{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%;font-family:var(--mono);font-size:12.5px}
+.me-form input[type=text]{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%}
+.me-status{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.me-status.dirty{color:var(--warn)}
+.team{display:grid;gap:6px}
+.member{display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);flex-wrap:wrap}
+.member .n{font-weight:800;min-width:110px}
+.member .n.me{color:var(--green-2)}
+.member .r{display:flex;gap:4px;flex-wrap:wrap;flex:1}
+.member .x{margin-left:auto;font-family:var(--mono);font-size:11px;border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:2px 7px;cursor:pointer;color:var(--ink-3)}
+.member .x:hover{color:var(--danger);border-color:var(--danger)}
+.who .names{display:inline-flex;gap:4px;flex-wrap:wrap;vertical-align:middle}
+.suggest{margin-top:22px;padding:14px 18px;border-left:4px solid var(--green);background:var(--green-soft);border-radius:0 var(--radius) var(--radius) 0;color:var(--green-ink)}
+
+/* ---------- budget ---------- */
+.ctl{display:flex;gap:14px;flex-wrap:wrap;align-items:end;margin-bottom:16px}
+.ctl label{display:grid;gap:4px;font-size:12.5px;color:var(--ink-2);font-weight:600}
+.ctl input[type=range]{accent-color:var(--green);width:220px}
+.ctl .val{font-family:var(--mono);font-weight:700;color:var(--ink)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--bg)}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:14px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);background:var(--bg-2);font-weight:700}
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.total td{font-weight:800;background:var(--bg-2);border-top:2px solid var(--ink)}
+td .opt{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+td .opt button{font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);background:var(--bg);cursor:pointer}
+td .opt button.on{background:var(--black);color:var(--phosphor);border-color:var(--black)}
+.budget-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+@media (max-width:800px){.budget-kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--black);color:var(--on-black);border-radius:var(--radius);padding:12px 14px;border:1px solid #233129}
+.kpi span{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#7f9487}
+.kpi b{display:block;font-family:var(--mono);font-size:24px;color:var(--phosphor);font-variant-numeric:tabular-nums;margin-top:2px}
+.kpi.light{background:var(--bg-2);color:var(--ink);border-color:var(--line)}
+.kpi.light b{color:var(--green-2)}
+.kpi.light span{color:var(--ink-3)}
+.note{font-size:12.5px;color:var(--ink-3);margin-top:10px}
+
+/* ---------- timeline ---------- */
+.tl{position:relative;padding-left:26px;display:grid;gap:14px;margin-top:6px}
+.tl::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl-item{position:relative;background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);padding:12px 16px}
+.tl-item::before{content:"";position:absolute;left:-23px;top:16px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:3px solid var(--green)}
+.tl-item.dday{border-color:var(--green);background:var(--green-soft)}
+.tl-item.dday::before{background:var(--green)}
+.tl-item.past{opacity:.75}
+.tl-item.past::before{background:var(--green);border-color:var(--green)}
+.tl-item.now{box-shadow:0 0 0 3px var(--green-soft);border-color:var(--green)}
+.tl-head{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:6px}
+.tl-head .t{font-family:var(--mono);font-weight:800;font-size:13px;color:var(--green-2)}
+.tl-head .d{font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+.tl-head h3{font-size:15.5px;font-weight:800}
+.tl-item ul{margin:0;padding-left:18px;font-size:14px;color:var(--ink-2);display:grid;gap:3px}
+.tl-item ul li b{color:var(--ink);font-weight:700}
+.dayplan{display:grid;grid-template-columns:110px 1fr;gap:0;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--bg)}
+.dayplan > div{padding:10px 14px;border-bottom:1px solid var(--line)}
+.dayplan > div:nth-last-child(-n+2){border-bottom:0}
+.dayplan .h{font-family:var(--mono);font-weight:800;background:var(--black);color:var(--phosphor);font-size:13px}
+@media (max-width:500px){.dayplan{grid-template-columns:90px 1fr}}
+
+/* ---------- stars ---------- */
+.stars{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.star{background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.star .s{font-family:var(--mono);color:var(--green);letter-spacing:.1em;font-size:15px}
+.star b{display:block;margin-top:4px}
+.star span{font-size:12.5px;color:var(--ink-3)}
+
+/* ---------- open questions ---------- */
+.q{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.q .who{font-family:var(--mono);font-size:11px;color:var(--green-2);white-space:nowrap;padding-top:3px;min-width:120px}
+textarea{width:100%;min-height:90px;resize:vertical;font-family:var(--mono);font-size:13px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.btn{font-family:var(--mono);font-size:12.5px;font-weight:700;padding:7px 12px;border-radius:6px;border:1px solid var(--ink);background:var(--black);color:var(--phosphor);cursor:pointer}
+.btn.ghost{background:var(--bg);color:var(--ink);border-color:var(--line)}
+.btn:hover{filter:brightness(1.1)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--black);color:var(--phosphor);font-family:var(--mono);font-size:13px;padding:8px 14px;border-radius:8px;border:1px solid #2a4a36;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+footer{max-width:1180px;margin:0 auto;padding:20px 16px 40px;font-family:var(--mono);font-size:12px;color:var(--ink-3);border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><span class="aso">core_dumped</span><span class="sep">/</span>COREBOOST<span class="cursor"></span></div>
+    <span class="conn" id="conn">conectando...</span>
+    <nav class="tabs" id="tabs">
+      <a href="#resumen">resumen</a>
+      <a href="#roles">roles</a>
+      <a href="#presupuesto">presupuesto</a>
+      <a href="#timeline">timeline</a>
+      <a href="#formato">formato</a>
+      <a href="#pendientes">pendientes</a>
+    </nav>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-in">
+    <div>
+      <div class="eyebrow" style="color:var(--phosphor)">Asociación Core Dumped · ETSISI · UPM</div>
+      <h1>CORE<span>BOOST</span></h1>
+      <p class="lead">Competición de programación algorítmica de la ETSISI: 6 problemas, sistema de estrellas, juez automático y podio con trofeos impresos en 3D. Esta página es nuestro panel interno de organización: quién hace qué, cuánto cuesta y cuándo toca cada cosa.</p>
+      <div class="stats">
+        <div class="stat"><b>6</b><span>problemas</span></div>
+        <div class="stat"><b>2h30</b><span>competición</span></div>
+        <div class="stat"><b>~4h</b><span>evento total</span></div>
+        <div class="stat"><b id="statDays">—</b><span>días para el evento</span></div>
+      </div>
+    </div>
+    <div class="term" aria-label="resumen del evento">
+      <div><span class="p">$</span> <span class="k">cat</span> coreboost.conf</div>
+      <div><span class="c"># sede</span></div>
+      <div>venue      = <span class="k">"ETSISI, Campus Sur UPM"</span></div>
+      <div>date       = <span class="k" id="termDate">"por definir"</span></div>
+      <div>mode       = <span class="k">individual | equipos ≤3</span></div>
+      <div>langs      = <span class="k">C/C++ Java Python JS Bash</span></div>
+      <div>scoring    = <span class="k">estrellas − penalización(tiempo)</span></div>
+      <div>leaderboard= <span class="k">congelado</span></div>
+      <div>sponsor    = <span class="k">JetBrains (en conversación)</span></div>
+      <div><span class="p">$</span> <span class="k">./organizar</span> --roles 6 --propuestos 4 --equipo <span class="cursor" style="display:inline-block;width:.6em;height:1em;background:var(--phosphor);vertical-align:-.15em"></span></div>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ============ RESUMEN ============ -->
+<section class="block" id="resumen">
+  <header><h2>// resumen</h2><span class="sub">estado general del evento</span></header>
+  <div class="grid g3">
+    <div class="panel">
+      <h3>Progreso global de tareas</h3>
+      <div class="progress" style="margin-top:8px"><div class="bar"><i id="barAll"></i></div><span id="pctAll">0 %</span></div>
+      <p class="note">Todo lo que cambies aquí (tareas, fecha, equipo, presupuesto, notas) se guarda al instante para todo el equipo, sin iniciar sesión. Cada tarea tachada muestra quién la tachó. Lo único que se queda en tu dispositivo es "quién eres".</p>
+    </div>
+    <div class="panel">
+      <h3>Fecha del evento <span class="shared-tag">común</span></h3>
+      <div class="ctl" style="margin:6px 0 0">
+        <label>Día D (provisional)<input type="date" id="eventDate"></label>
+      </div>
+      <p class="note">Es la misma para todo el equipo: al cambiarla la ven todos al instante. Recalcula el cronograma entero.</p>
+    </div>
+    <div class="panel">
+      <h3>Quién eres <span class="shared-tag">equipo</span></h3>
+      <div class="me-form">
+        <select id="pickMe" aria-label="Elegirme de la lista del equipo"></select>
+        <input type="text" id="myName" maxlength="40" placeholder="O escribe tu nombre si es la primera vez" autocomplete="off">
+        <div class="chips" id="roleChips"></div>
+        <div class="toolbar" style="margin-top:2px"><button class="btn" id="btnSaveMe">guardar en el equipo</button><span class="me-status" id="meStatus"></span></div>
+      </div>
+      <p class="note">Si ya te registraste desde otro dispositivo, elígete en la lista y se cargan tus roles. Al guardar, todo el equipo ve tu nombre y tus roles; tus tarjetas salen primero.</p>
+    </div>
+  </div>
+  <div class="grid g2" style="margin-top:14px">
+    <div class="panel">
+      <h3>Equipo <span class="pill" id="teamCount">0</span></h3>
+      <div class="team" id="team"></div>
+      <p class="note">Una persona puede tener varios roles y un rol varias personas. Mínimo recomendable: 1 coordinación, 1 manager, 2 marketing, 2 problemas, 1–2 infraestructura, 1–2 organización, 2 testers.</p>
+    </div>
+    <div class="panel">
+      <h3>Cómo usar este panel</h3>
+      <ul class="clean">
+        <li>Cada rol tiene su lista de tareas con la fase en la que toca hacerlas (T-8, T-4…); al tacharlas queda registrado quién y cuándo.</li>
+        <li>El presupuesto se recalcula con el número de participantes y las opciones que elijáis.</li>
+        <li>El cronograma se ancla a la fecha del evento; lo que ya pasó se atenúa.</li>
+        <li>Las decisiones abiertas están al final: cada una tiene un responsable de cerrarla.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ROLES ============ -->
+<section class="block" id="roles">
+  <header><h2>// roles</h2><span class="sub">6 definidos + 4 propuestos</span></header>
+  <div class="role-filter">
+    <span class="muted">Mostrar:</span>
+    <button class="btn ghost" data-filter="all">todos</button>
+    <button class="btn ghost" data-filter="def">definidos</button>
+    <button class="btn ghost" data-filter="prop">propuestos</button>
+    <button class="btn ghost" data-filter="pending">con tareas pendientes</button>
+  </div>
+  <div class="roles" id="roleGrid"></div>
+
+  <div class="suggest">
+    <b>Sugerencias de la IA sobre los roles.</b> Los cuatro roles marcados como <em>propuestos</em> no estaban en vuestra lista. Los dos que más recomiendo cubrir son <b>Testers de problemas</b> (alguien que no haya diseñado el problema tiene que resolverlo antes del evento: es la única forma de pillar enunciados ambiguos, tests incorrectos o límites de tiempo mal calibrados) y <b>Staff de sala</b> (el día D hace falta gente que responda clarificaciones, vigile el uso de IA y revise el código de los ganadores). Tesorería y Contenido pueden absorberlos Manager y Marketing si sois pocos.
+  </div>
+</section>
+
+<!-- ============ PRESUPUESTO ============ -->
+<section class="block" id="presupuesto">
+  <header><h2>// presupuesto</h2><span class="sub">estimación orientativa, precios de Madrid 2026</span></header>
+  <div class="ctl">
+    <label>Participantes previstos <input type="range" id="nPart" min="20" max="120" step="5" value="50"> <span class="val" id="nPartVal">50</span></label>
+    <label>Podios (por curso) <input type="number" id="nPodios" min="1" max="4" value="1" style="width:80px"></label>
+    <label>Contingencia <input type="range" id="contPct" min="0" max="25" step="5" value="10"> <span class="val" id="contVal">10 %</span></label>
+  </div>
+  <div class="budget-kpis">
+    <div class="kpi"><span>Total estimado</span><b id="kTotal">—</b></div>
+    <div class="kpi light"><span>Coste por participante</span><b id="kPer">—</b></div>
+    <div class="kpi light"><span>Escenario mínimo</span><b id="kMin">—</b></div>
+    <div class="kpi light"><span>Escenario máximo</span><b id="kMax">—</b></div>
+  </div>
+  <div class="tablewrap">
+    <table id="budget">
+      <thead><tr><th>Partida</th><th>Responsable</th><th>Opción y base del cálculo</th><th class="num">Mín.</th><th class="num">Estimado</th><th class="num">Máx.</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <p class="note">Fuentes de referencia: coffee break estándar en Madrid 6–12 €/persona (Stillroom, Mister Nok, Rcater); A3 color en copistería 0,63–1,76 €/ud (Copykrea, Área Gráfica); trofeo pequeño en PLA 10–50 € comprado o ~40 €/kg de filamento si lo imprimís vosotros (Servitec3D, RS); JetBrains ofrece licencias, swag y ponentes a comunidades a través de su programa Community Support. Los precios de la cafetería de la ETSISI hay que negociarlos: suelen quedar muy por debajo de un catering externo.</p>
+</section>
+
+<!-- ============ TIMELINE ============ -->
+<section class="block" id="timeline">
+  <header><h2>// timeline</h2><span class="sub">cuenta atrás desde <span id="tlDate" class="mono">—</span></span></header>
+  <div class="tl" id="tl"></div>
+
+  <h3 style="margin:30px 0 10px;font-family:var(--mono);font-size:16px">Día D · horario previsto (3h30–4h)</h3>
+  <div class="dayplan">
+    <div class="h">0:00–0:30</div><div><b>Bienvenida.</b> Presentación de COREBOOST y Core Dumped, lectura de reglas, comprobación de acceso a la plataforma.</div>
+    <div class="h">0:30–0:50</div><div><b>Ponencia del patrocinador</b> (JetBrains u otro). Duración a confirmar con el ponente.</div>
+    <div class="h">0:50–3:20</div><div><b>Competición (2h30).</b> Apertura de la plataforma, clarificaciones por escrito, leaderboard congelado.</div>
+    <div class="h">3:20–3:50</div><div><b>Revisión.</b> Verificación de código de los primeros puestos, descanso y catering para participantes.</div>
+    <div class="h">3:50–4:20</div><div><b>Clausura.</b> Entrega de trofeos, sorteos por papeletas de estrellas, foto de grupo, agradecimientos.</div>
+  </div>
+  <p class="note">El documento original solapa la ponencia con el inicio de la competición (ambas a las 0:30). Aquí se ha desplazado la competición 20 min para que la charla no reste tiempo de resolución; ajustad si el ponente prefiere cerrar el evento.</p>
+</section>
+
+<!-- ============ FORMATO ============ -->
+<section class="block" id="formato">
+  <header><h2>// formato</h2><span class="sub">lo que ya está decidido en el documento</span></header>
+  <div class="stars">
+    <div class="star"><div class="s">★</div><b>1 problema</b><span>Calentamiento. Resoluble sin experiencia previa.</span></div>
+    <div class="star"><div class="s">★★</div><b>2 problemas</b><span>Fácil-medio. Un bucle, un poco de lógica.</span></div>
+    <div class="star"><div class="s">★★★</div><b>1 problema</b><span>Medio. Estructura de datos o greedy.</span></div>
+    <div class="star"><div class="s">★★★★</div><b>1 problema</b><span>Difícil. Programación dinámica, grafos.</span></div>
+    <div class="star"><div class="s">★★★★★</div><b>1 problema</b><span>Reto máximo. Que decida el podio.</span></div>
+  </div>
+  <div class="grid g3" style="margin-top:14px">
+    <div class="panel">
+      <h3>Puntuación</h3>
+      <ul class="clean">
+        <li>Suma de estrellas de los problemas aceptados.</li>
+        <li>Desempate por tiempo total invertido.</li>
+        <li>+5 min de penalización por cada envío rechazado.</li>
+        <li>Leaderboard oculto: solo se ve Aceptado / Rechazado propio.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Reglas</h3>
+      <ul class="clean">
+        <li>Individual o equipos de hasta 3.</li>
+        <li>Lenguajes: C/C++, Java, Python, JavaScript, Bash.</li>
+        <li>Prohibido IA (ChatGPT, Copilot), ayuda externa y copia. Plagio = descalificación.</li>
+        <li>Documentación oficial de los lenguajes disponible en el entorno.</li>
+        <li>Límites estrictos de tiempo y memoria: fuera fuerza bruta.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Premios</h3>
+      <ul class="clean">
+        <li>Podio: trofeos personalizados impresos en 3D (varios podios por curso si hay participación).</li>
+        <li>Material de patrocinadores.</li>
+        <li>Sorteo: cada estrella conseguida = una papeleta. Mantiene el interés hasta el final.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PENDIENTES ============ -->
+<section class="block" id="pendientes">
+  <header><h2>// pendientes</h2><span class="sub">decisiones abiertas y notas</span></header>
+  <div class="grid" style="gap:8px" id="questions"></div>
+  <h3 style="margin:24px 0 8px;font-size:15px">Notas del equipo (comunes, en directo)</h3>
+  <textarea id="notes" placeholder="Acuerdos de la última reunión, contactos, ideas..."></textarea>
+  <div class="toolbar">
+    <button class="btn ghost" id="btnReset">reiniciar todas las casillas</button>
+  </div>
+</section>
+
+</main>
+<footer>core_dumped // coreboost — panel de organización interno · generado 19-09-2026 a partir de COREBOOST.docx · datos en tiempo real (Firebase) · precios orientativos, confirmad con proveedores</footer>
+<div class="toast" id="toast">ok</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+<script>
+/* ================= DATA ================= */
+const ROLES = [
+ {id:'coord',code:'ROL 01',name:'Coordinación interna',who:'por asignar',proposed:false,
+  desc:'Dirige y coordina a los grupos de roles dentro de la organización. Recomienda, desbloquea y toma las decisiones que no caen dentro del ámbito de ningún rol concreto. Está presente apoyando donde haga falta.',
+  fns:['Convocar y moderar las reuniones internas (semanal recomendado).','Mantener este panel y la lista de decisiones abiertas al día.','Arbitrar cuando dos roles se pisan (p. ej. marketing vs. organización con los carteles).','Vigilar el cronograma y avisar cuando algo se retrasa.','Ser la persona de referencia para el resto del equipo el día D.'],
+  tasks:[['Asignar responsables a todos los roles','T-10'],['Fijar fecha objetivo con dirección y equipo','T-10'],['Reunión de kickoff y reparto de este panel','T-10'],['Cerrar la decisión UPM-only vs. abierta','T-6'],['Revisar avance de cada rol (checkpoint)','T-4'],['Ensayo general (dry run) con todo el equipo','T-2'],['Briefing de staff el día anterior','T-1'],['Retrospectiva post-evento','T+1']]},
+ {id:'manager',code:'ROL 02',name:'Manager',who:'por asignar',proposed:false,
+  desc:'La cara del evento de puertas afuera: dirección de la escuela, profesorado, cafetería y patrocinadores. Gestiona los acuerdos y el calendario de contacto con cada parte.',
+  fns:['Hablar con el director de la ETSISI: aval del evento, sala, fecha, difusión oficial.','Reclutar profesores que revisen enunciados y corrijan/validen problemas.','Negociar con la cafetería un catering para el final del evento (precio cerrado por persona).','Contactar patrocinadores (JetBrains vía su programa Community Support; también Google Developer Groups, empresas del campus) y pedir licencias, swag, ponente o dinero.','Gestionar los permisos: uso de la sala fuera de horario, megafonía, colgar carteles.','Llevar el presupuesto real frente al estimado (si no hay tesorería).'],
+  tasks:[['Reunión con el director: aval, fecha y sala','T-10'],['Enviar propuesta a JetBrains (community support form)','T-9'],['Contactar 2–3 profesores revisores','T-8'],['Pedir presupuesto a la cafetería para N personas','T-6'],['Confirmar patrocinio y qué aportan','T-5'],['Firmar/confirmar catering con nº de inscritos','T-3'],['Confirmar ponente y duración de la charla','T-2'],['Enviar agradecimientos a director, profes y sponsors','T+1']]},
+ {id:'mkt',code:'ROL 03',name:'Marketing',who:'por asignar',proposed:false,
+  desc:'Consigue que la gente se entere y se apunte. Redes, carteles físicos en la universidad, correo institucional y las plataformas de inscripción de la UPM.',
+  fns:['Diseñar la identidad visual del evento (cartel, plantillas de redes, banner) en verde / blanco / negro.','Redes sociales: calendario de publicaciones (anuncio, cuenta atrás, presentación de sponsors, recordatorio, resultados).','Carteles físicos en la ETSISI: pasillos, cafetería, biblioteca, tablones de las aulas.','Subir el evento a Konecta para habilitar la inscripción.','Publicar en UPM Conecta (upmconecta.es) y en Uni-Life, la app oficial de eventos de la UPM.','Correo a todo el alumnado de la ETSISI a través de secretaría / dirección (lo pide el manager, lo redacta marketing).','Pedir a los profesores que lo anuncien en clase los últimos días.','Formulario de inscripción: nombre, curso, equipo, lenguaje preferido, correo UPM.','Emails a inscritos: confirmación, recordatorio T-1, instrucciones de acceso a la plataforma.'],
+  tasks:[['Definir identidad visual y plantilla de cartel','T-8'],['Redactar textos: descripción corta, larga y para email','T-7'],['Crear el evento en Konecta (inscripción)','T-6'],['Subir a UPM Conecta y Uni-Life','T-6'],['Imprimir y colgar carteles (con organización)','T-5'],['Enviar correo a estudiantes ETSISI (vía dirección)','T-5'],['Publicaciones en redes: anuncio + sponsors','T-5'],['Pedir a profes que lo mencionen en clase','T-2'],['Recordatorio + instrucciones a inscritos','T-1'],['Publicar resultados, fotos y agradecimientos','T+1']]},
+ {id:'prob',code:'ROL 04',name:'Diseño de problemas',who:'por asignar',proposed:false,
+  desc:'Crea los 6 problemas de la competición: enunciados, casos de prueba, soluciones de referencia y límites. Problemas que se resuelven con código, medianamente sencillos y variados.',
+  fns:['Proponer 8–10 candidatos y quedarse con 6 siguiendo la escala de estrellas (1/2/2/1... según documento: 1×★, 2×★★, 1×★★★, 1×★★★★, 1×★★★★★).','Redactar cada enunciado con formato fijo: historia corta, entrada, salida, restricciones, 2 ejemplos explicados.','Escribir la solución de referencia en al menos dos lenguajes (rápido y lento, p. ej. C++ y Python) para calibrar límites de tiempo.','Generar tests: casos límite, casos grandes, casos que tumben la fuerza bruta.','Elegir temáticas distintas por problema (strings, simulación, greedy, grafos, DP…) sin fórmulas de nicho.','Entregar el paquete a infraestructura en el formato que pida el juez (DOMjudge / Kattis-like).','Preparar el editorial (explicación de soluciones) para publicarlo después.'],
+  tasks:[['Lluvia de candidatos (8–10) con estrella estimada','T-8'],['Elegir los 6 definitivos y repartir autores','T-7'],['Enunciados v1 de los 6 problemas','T-6'],['Soluciones de referencia + generador de tests','T-5'],['Revisión por profesores y testers','T-4'],['Ajustar límites tiempo/memoria con el juez real','T-3'],['Enunciados finales congelados','T-2'],['Editorial escrito para publicar','T+1']]},
+ {id:'infra',code:'ROL 05',name:'Infraestructura',who:'por asignar',proposed:false,
+  desc:'Levanta la plataforma donde los participantes envían código y se evalúa automáticamente. Sistema de puntos, penalizaciones, leaderboard congelado y todo lo técnico del día.',
+  fns:['Elegir la plataforma: DOMjudge (estándar ICPC, self-hosted), Kattis-like propio, o un contest privado en Codeforces/HackerRank si no queréis hosting.','Desplegar el juez: servidor (VPS o máquina de la escuela), sandboxes por lenguaje (C/C++, Java, Python, JS, Bash), límites de tiempo/memoria.','Implementar la puntuación híbrida: estrellas + tiempo + 5 min por envío rechazado; leaderboard oculto hasta la clausura.','Sistema de papeletas virtuales para el sorteo (estrellas → papeletas) y el propio sorteo.','Cuentas de usuario / equipos generadas a partir de las inscripciones.','Cargar problemas y tests; probar con las soluciones de referencia y con soluciones incorrectas.','Prueba de carga: 50–100 envíos simultáneos en el último minuto.','Plan B: qué pasa si cae el servidor (backup, envíos por correo, tiempo extra).','El día D: monitorización, clarificaciones, y registro de envíos para revisar plagio.'],
+  tasks:[['Decidir plataforma y dónde se aloja','T-8'],['Despliegue base con un problema de prueba','T-6'],['Puntuación híbrida y leaderboard congelado','T-5'],['Cargar los 6 problemas con sus tests','T-4'],['Prueba de carga y plan B documentado','T-3'],['Importar cuentas de inscritos','T-2'],['Dry run completo con el equipo','T-2'],['Congelar plataforma; congelar cambios','T-1']]},
+ {id:'org',code:'ROL 06',name:'Organización del evento',who:'por asignar',proposed:false,
+  desc:'Todo lo material y físico que estará presente el día D: sala, mesas, sonido, catering (una vez acordado por el manager), trofeos, carteles impresos, acreditaciones.',
+  fns:['Reservar y preparar la sala: amplia, con luz natural, sin ruido, enchufes suficientes y wifi/cable comprobado.','Sonido: micrófono, altavoces y mesa de mezclas de la escuela; lista de música para descansos.','Trofeos: modelado e impresión 3D (o pedirlos a un taller), grabado del nombre del evento.','Catering: ubicación de las mesas, horario de montaje con la cafetería, vasos/servilletas, gestión de residuos.','Imprimir carteles y señalética (dirección a la sala, "silencio: competición en curso").','Acreditaciones / pegatinas con número de equipo; hoja de asistencia.','Material del día: regletas, cables, cinta, agua, sobres para papeletas del sorteo.','Fotografía y vídeo si no hay rol de contenido.','Recogida y devolución de todo al terminar.'],
+  tasks:[['Visitar y reservar la sala con dirección','T-8'],['Diseñar el trofeo en 3D (prueba de impresión)','T-6'],['Imprimir carteles en copistería','T-5'],['Imprimir los trofeos definitivos','T-3'],['Comprar material del día (regletas, papelería)','T-2'],['Montaje de la sala y sonido probado','T-1'],['Montar zona de catering con la cafetería','D'],['Recoger la sala y devolver material','D']]},
+ {id:'test',code:'ROL 07',name:'Testers de problemas',who:'por asignar (propuesto)',proposed:true,
+  desc:'Resuelven los problemas "a ciegas" antes del evento, sin haberlos diseñado. Detectan enunciados ambiguos, tests erróneos y límites mal calibrados. En competiciones serias es obligatorio.',
+  fns:['Resolver cada problema solo con el enunciado, cronometrando el tiempo.','Reportar ambigüedades y proponer aclaraciones.','Intentar soluciones "tramposas" (fuerza bruta) para comprobar que los límites las rechazan.','Validar que la dificultad en estrellas es realista.'],
+  tasks:[['Reclutar testers (miembros que no diseñen)','T-6'],['Resolver los 6 problemas y reportar','T-4'],['Segunda pasada tras las correcciones','T-3']]},
+ {id:'staff',code:'ROL 08',name:'Staff de sala / jueces',who:'por asignar (propuesto)',proposed:true,
+  desc:'El equipo que sostiene el evento durante la competición: responde clarificaciones, vigila el cumplimiento de las reglas y revisa el código de los finalistas.',
+  fns:['Mesa de clarificaciones: respuestas por escrito y públicas para todos.','Vigilancia anti-IA y anti-copia (paseos, pantallas, revisión de envíos sospechosos).','Revisión manual del código de los primeros puestos antes de anunciar el podio.','Presentador/a de la ceremonia y de los sorteos.','Cronometraje y anuncios por megafonía (30 min, 10 min, 1 min).'],
+  tasks:[['Repartir puestos: clarificaciones, vigilancia, presentación','T-1'],['Protocolo de descalificación por escrito','T-1'],['Revisar código de finalistas','D']]},
+ {id:'fin',code:'ROL 09',name:'Tesorería',who:'por asignar (propuesto)',proposed:true,
+  desc:'Controla el dinero: presupuesto, facturas, dinero de la asociación, aportaciones de sponsors y solicitud de ayudas de la UPM a asociaciones.',
+  fns:['Mantener el presupuesto real vs. estimado.','Guardar facturas y tickets para justificar gastos ante la asociación / UPM.','Solicitar ayudas para actividades de asociaciones (convocatorias de la UPM y de la escuela).','Gestionar pagos a cafetería y copistería.'],
+  tasks:[['Consultar convocatoria de ayudas a asociaciones','T-9'],['Aprobar presupuesto con la junta de Core Dumped','T-7'],['Cierre de cuentas del evento','T+1']]},
+ {id:'media',code:'ROL 10',name:'Contenido y foto',who:'por asignar (propuesto)',proposed:true,
+  desc:'Documenta el evento: fotos, vídeo corto (aftermovie), redes en directo. Es lo que se enseña al año siguiente y a los patrocinadores.',
+  fns:['Fotos de la sala, del podio, de los sponsors y de grupo.','Stories/publicaciones en directo durante el evento.','Aftermovie de 30–60 s para redes y para el informe a patrocinadores.','Informe post-evento con cifras (inscritos, asistentes, envíos, problemas resueltos).'],
+  tasks:[['Lista de planos que hay que sacar','T-1'],['Cobertura en directo','D'],['Aftermovie + informe a sponsors','T+1']]}
+];
+
+/* Budget lines: options with [min,est,max] per unit; unit 'pp' = per participant, 'podio' = per podium, 'flat' */
+const BUDGET = [
+ {id:'cat',name:'Catering post-evento',owner:'Manager / Organización',unit:'pp',opts:[
+   {k:'cafe',label:'Cafetería ETSISI (acuerdo)',min:3,est:5,max:8,note:'Pinchos, bollería y refresco; precio negociado por persona'},
+   {k:'ext',label:'Coffee break externo',min:6,est:9,max:12,note:'Catering profesional estándar en Madrid'},
+   {k:'diy',label:'Lo compramos nosotros',min:2,est:3,max:5,note:'Supermercado: refrescos, snacks, bollería'}],def:'cafe'},
+ {id:'tro',name:'Trofeos podio (×3 por podio)',owner:'Organización',unit:'podio',opts:[
+   {k:'own',label:'Impresión 3D propia',min:12,est:20,max:35,note:'~150 g de PLA por trofeo a ~40 €/kg + placa/pegatina'},
+   {k:'shop',label:'Taller de impresión 3D',min:60,est:100,max:150,note:'Trofeo pequeño personalizado 20–50 € cada uno'}],def:'own'},
+ {id:'pos',name:'Carteles y señalética',owner:'Marketing / Organización',unit:'flat',opts:[
+   {k:'a3',label:'30 A3 color + 2 A2',min:30,est:45,max:70,note:'A3 color 0,63–1,76 €/ud en copistería; A2 ~5 €/ud'},
+   {k:'min',label:'15 A3 color',min:12,est:20,max:30,note:'Solo puntos clave de la escuela'}],def:'a3'},
+ {id:'inf',name:'Infraestructura (juez)',owner:'Infraestructura',unit:'flat',opts:[
+   {k:'upm',label:'Servidor de la escuela',min:0,est:0,max:10,note:'Máquina cedida por la ETSISI; sin coste'},
+   {k:'vps',label:'VPS 1–2 meses + dominio',min:10,est:25,max:50,note:'VPS 5–15 €/mes (Hetzner, OVH) + dominio ~10 €'},
+   {k:'saas',label:'Contest privado (Codeforces/HackerRank)',min:0,est:0,max:0,note:'Sin coste, menos control sobre la puntuación'}],def:'vps'},
+ {id:'pre',name:'Premios sorteo y merch',owner:'Manager / Marketing',unit:'flat',opts:[
+   {k:'spon',label:'Solo swag de sponsors',min:0,est:0,max:0,note:'JetBrains aporta swag y licencias a comunidades'},
+   {k:'mix',label:'Swag + 3 tarjetas regalo',min:45,est:60,max:90,note:'3 × 15–30 € (Amazon, Steam)'},
+   {k:'full',label:'Sin sponsor: premios propios',min:100,est:150,max:250,note:'Podio + sorteo a cargo de la asociación'}],def:'mix'},
+ {id:'stk',name:'Pegatinas Core Dumped',owner:'Marketing',unit:'flat',opts:[
+   {k:'no',label:'No',min:0,est:0,max:0,note:''},
+   {k:'100',label:'100 pegatinas vinilo',min:15,est:25,max:40,note:'Impresión online de pegatinas troqueladas'}],def:'100'},
+ {id:'snd',name:'Sonido y sala',owner:'Organización',unit:'flat',opts:[
+   {k:'upm',label:'Equipo de la escuela',min:0,est:0,max:0,note:'Micro, altavoces y mesa cedidos por la ETSISI'},
+   {k:'rent',label:'Alquiler de equipo',min:50,est:80,max:120,note:'Solo si la escuela no lo cede'}],def:'upm'},
+ {id:'mat',name:'Material del día',owner:'Organización',unit:'flat',opts:[
+   {k:'std',label:'Papelería, acreditaciones, regletas, agua',min:15,est:30,max:50,note:'Sobres para papeletas, cinta, etiquetas, botellas'}],def:'std'}
+];
+
+const TIMELINE = [
+ {w:-10,title:'Arranque interno',items:[['Coordinación','reparto de roles, kickoff, fecha objetivo'],['Manager','reunión con el director: aval, sala y fecha'],['Tesorería','consultar ayudas a asociaciones']]},
+ {w:-9,title:'Patrocinadores',items:[['Manager','propuesta a JetBrains (Community Support) y otros sponsors: necesitan 6–8 semanas'],['Marketing','dossier de patrocinio de una página (público, cifras, contrapartidas)']]},
+ {w:-8,title:'Diseño y plataforma',items:[['Problemas','lluvia de candidatos con estrellas'],['Infraestructura','elegir plataforma y hosting'],['Organización','visitar y reservar la sala'],['Marketing','identidad visual y plantilla de cartel']]},
+ {w:-7,title:'Contenido',items:[['Problemas','6 definitivos y autores'],['Marketing','textos para redes, email y plataformas'],['Tesorería','presupuesto aprobado por la junta']]},
+ {w:-6,title:'Inscripciones listas',items:[['Marketing','evento en Konecta, UPM Conecta y Uni-Life'],['Manager','profesores revisores confirmados; presupuesto a cafetería'],['Problemas','enunciados v1'],['Infraestructura','despliegue base con un problema de prueba'],['Organización','prototipo del trofeo 3D']]},
+ {w:-5,title:'Lanzamiento público',items:[['Marketing','carteles colgados, correo a ETSISI, anuncio en redes'],['Manager','patrocinio confirmado y qué aportan'],['Problemas','soluciones de referencia y tests'],['Infraestructura','puntuación híbrida + leaderboard congelado']]},
+ {w:-4,title:'Validación',items:[['Testers','resolver los 6 problemas a ciegas'],['Manager','profesores revisan enunciados'],['Infraestructura','los 6 problemas cargados'],['Coordinación','checkpoint general']]},
+ {w:-3,title:'Ajustes',items:[['Problemas','límites calibrados en el juez real'],['Infraestructura','prueba de carga y plan B'],['Organización','imprimir trofeos definitivos'],['Manager','confirmar catering con nº de inscritos']]},
+ {w:-2,title:'Ensayo general',items:[['Todos','dry run completo: inscripción → envío → puntuación → sorteo'],['Problemas','enunciados congelados'],['Infraestructura','cuentas de inscritos importadas'],['Manager','ponente y duración de la charla confirmados'],['Marketing','profes lo mencionan en clase; segunda oleada en redes']]},
+ {w:-1,title:'Semana final',items:[['Marketing','recordatorio e instrucciones a inscritos; cierre de inscripciones'],['Organización','material comprado, sala montada, sonido probado'],['Staff','puestos del día D y protocolo de descalificación'],['Coordinación','briefing final del equipo']]},
+ {w:0,title:'Día D',dday:true,items:[['Todos','ver horario del día abajo'],['Staff','clarificaciones, vigilancia, revisión de código'],['Organización','catering y recogida']]},
+ {w:1,title:'Post-evento',items:[['Marketing','resultados, fotos y agradecimientos públicos'],['Problemas','publicar editorial'],['Manager','agradecimientos a director, profes y sponsors'],['Contenido','aftermovie e informe con cifras'],['Tesorería','cierre de cuentas'],['Coordinación','retrospectiva: qué repetir y qué cambiar']]}
+];
+
+const QUESTIONS = [
+ ['Coordinación','Fecha definitiva del evento (¿coincidir con la semana UPM Conecta de noviembre o marzo para tener difusión gratis?).'],
+ ['Manager','¿Inscripción solo UPM o abierta a otras universidades? Depende de lo que pidan los patrocinadores.'],
+ ['Manager','¿Qué sala exactamente? Necesita luz natural, silencio, enchufes y wifi estable.'],
+ ['Coordinación','Asignar responsables a cada rol (todos están por asignar ahora mismo).'],
+ ['Infraestructura','DOMjudge self-hosted vs. contest privado en Codeforces: control de puntuación frente a cero mantenimiento.'],
+ ['Problemas','¿Podios por curso? Solo si hay suficientes inscritos por curso (mínimo ~8 por grupo).'],
+ ['Marketing','¿Los equipos se forman antes (en la inscripción) o en el sitio?'],
+ ['Organización','¿La ponencia del sponsor va al principio o al final? Afecta al horario y a la atención del público.']
+];
+
+/* ================= STATE ================= */
+/* Claves públicas de Firebase (no son secretas; los datos los protegen las reglas de la base de datos) */
+const FIREBASE_CONFIG={
+  apiKey:"AIzaSyDlBPgaSPynI9jlrfKOQnWo9qXzNZ47hO0",
+  authDomain:"coreboost-e1ed5.firebaseapp.com",
+  databaseURL:"https://coreboost-e1ed5-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:"coreboost-e1ed5",
+  storageBucket:"coreboost-e1ed5.firebasestorage.app",
+  messagingSenderId:"121838154524",
+  appId:"1:121838154524:web:83b8edcac8dde9efc780d9"
+};
+const ROOT='coreboost';
+const LKEY='coreboost.local.v2';
+/* lo único local: quién soy en este dispositivo */
+let local={name:''};
+try{const s=JSON.parse(localStorage.getItem(LKEY));if(s&&typeof s==='object')local=Object.assign(local,s);}catch(e){}
+function saveLocal(){try{localStorage.setItem(LKEY,JSON.stringify(local));}catch(e){}}
+/* estado común (viene de Firebase, igual para todos) */
+const DEFAULT_BUDGET={nPart:50,nPodios:1,cont:10,opts:{}};
+let S={date:'',members:{},done:{},notes:'',budget:Object.assign({},DEFAULT_BUDGET)};
+let db=null,connected=false,ready=false,draft=[];
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const eur=n=>new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);
+const slug=n=>String(n||'').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'x';
+const members=()=>Object.values(S.members||{}).filter(m=>m&&m.name).sort((a,b)=>a.name.localeCompare(b.name,'es'));
+const rolesOf=m=>Array.isArray(m&&m.roles)?m.roles:[];
+const me=()=>local.name?(S.members||{})[slug(local.name)]||null:null;
+const myRoles=()=>rolesOf(me());
+const isMine=id=>myRoles().includes(id);
+const peopleIn=id=>members().filter(m=>rolesOf(m).includes(id)).map(m=>m.name);
+const eventDate=()=>S.date||'';
+const sameSet=(a,b)=>a.length===b.length&&a.every(x=>b.includes(x));
+
+/* ================= FIREBASE ================= */
+function setConn(txt){
+  const el=$('#conn');if(!el)return;
+  el.classList.remove('on','off');
+  if(txt){el.textContent=txt;el.classList.add('off');return;}
+  if(connected){el.textContent='en directo';el.classList.add('on');}
+  else{el.textContent=ready?'sin conexión':'conectando...';el.classList.add(ready?'off':'');}
+}
+function write(path,val,msg){
+  if(!db){toast('sin conexión: no se ha guardado');return Promise.resolve(false);}
+  return db.ref(ROOT+'/'+path).set(val).then(()=>{if(msg)toast(msg);return true;})
+    .catch(e=>{toast('no se pudo guardar ('+(e.code||e.message||'error')+')');return false;});
+}
+function connectFirebase(){
+  if(!window.firebase){setConn('sin conexión (no carga Firebase)');return;}
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);db=firebase.database();
+    db.ref('.info/connected').on('value',s=>{connected=!!s.val();setConn();});
+    db.ref(ROOT).on('value',snap=>{
+      const v=snap.val()||{};
+      S={date:v.date||'',members:v.members||{},done:v.done||{},notes:v.notes||'',budget:Object.assign({},DEFAULT_BUDGET,v.budget||{})};
+      S.budget.opts=S.budget.opts||{};
+      if(!ready){ready=true;draft=[...myRoles()];}
+      renderAll();
+    },err=>{db=null;setConn('sin acceso ('+(err.code||'reglas')+')');});
+    setTimeout(()=>{if(!ready)setConn('no responde: revisa las reglas de la base de datos');},10000);
+  }catch(e){db=null;setConn('error al conectar');}
+}
+
+/* ================= ROLES ================= */
+let filter='all';
+const fmtAt=t=>t?new Date(t).toLocaleDateString('es-ES',{day:'2-digit',month:'short'}):'';
+function renderRoles(){
+  const box=$('#roleGrid');box.innerHTML='';
+  const ordered=[...ROLES].sort((a,b)=>(isMine(b.id)?1:0)-(isMine(a.id)?1:0));
+  ordered.forEach(r=>{
+    const total=r.tasks.length,done=r.tasks.filter((t,i)=>S.done[r.id+'_'+i]).length;
+    if(filter==='def'&&r.proposed)return;
+    if(filter==='prop'&&!r.proposed)return;
+    if(filter==='pending'&&done===total)return;
+    const who=peopleIn(r.id);
+    const el=document.createElement('article');
+    el.className='role'+(r.proposed?' proposed':'')+(isMine(r.id)?' mine':'');
+    el.innerHTML=`<div class="head"><div class="code">${r.code}${r.proposed?' · PROPUESTO':''}</div>
+      <h3>${esc(r.name)} ${r.proposed?'<span class="pill warn">propuesto</span>':'<span class="pill green">definido</span>'}${isMine(r.id)?'<span class="pill black">tú</span>':''}</h3>
+      <div class="who">Responsables: ${who.length?'<span class="names">'+who.map(n=>'<span class="pill green">'+esc(n)+'</span>').join('')+'</span>':'<b>por asignar</b>'}</div></div>
+      <p class="desc">${esc(r.desc)}</p>
+      <div class="fn"><h4>Funciones</h4><ul class="clean small">${r.fns.map(f=>`<li>${esc(f)}</li>`).join('')}</ul></div>
+      <div class="tasks"><h4 class="fn" style="padding:0;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:6px 0 2px">Tareas</h4>
+      ${r.tasks.map((t,i)=>{const k=r.id+'_'+i,d=S.done[k];return `<label class="task${d?' done':''}"><input type="checkbox" id="chk-${k}" data-k="${k}" ${d?'checked':''}><span>${esc(t[0])}</span><span class="tag">${d?'✓ '+esc(d.by||'alguien')+(d.at?' · '+fmtAt(d.at):''):esc(t[1])}</span></label>`;}).join('')}</div>
+      <div class="foot"><div class="progress"><div class="bar"><i style="width:${total?done/total*100:0}%"></i></div><span>${done}/${total}</span></div></div>`;
+    box.appendChild(el);
+  });
+  box.querySelectorAll('input[type=checkbox]').forEach(c=>c.addEventListener('change',e=>{
+    const k=e.target.dataset.k;
+    write('done/'+k,e.target.checked?{by:local.name||'alguien',at:Date.now()}:null);
+  }));
+  if(!box.children.length)box.innerHTML='<p class="muted">Nada que mostrar con este filtro.</p>';
+}
+function renderGlobal(){
+  let t=0,d=0;ROLES.forEach(r=>r.tasks.forEach((x,i)=>{t++;if(S.done[r.id+'_'+i])d++;}));
+  const p=t?Math.round(d/t*100):0;$('#barAll').style.width=p+'%';$('#pctAll').textContent=`${p} % · ${d}/${t}`;
+}
+document.querySelectorAll('.role-filter button').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;renderRoles();}));
+
+/* ================= BUDGET ================= */
+function renderBudget(){
+  const B=S.budget,n=+B.nPart||50,np=Math.max(1,+B.nPodios||1),cont=(+B.cont||0)/100;
+  const tb=$('#budget tbody');tb.innerHTML='';
+  let sMin=0,sEst=0,sMax=0;
+  BUDGET.forEach(b=>{
+    const sel=(B.opts||{})[b.id]||b.def;const o=b.opts.find(x=>x.k===sel)||b.opts[0];
+    const mult=b.unit==='pp'?n:b.unit==='podio'?np:1;
+    const mn=o.min*mult,es=o.est*mult,mx=o.max*mult;sMin+=mn;sEst+=es;sMax+=mx;
+    const base=b.unit==='pp'?`${o.est} €/persona × ${n}`:b.unit==='podio'?`${o.est} €/podio × ${np}`:'importe fijo';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><b>${esc(b.name)}</b></td><td class="small">${esc(b.owner)}</td>
+      <td><div class="small">${esc(o.note)}</div><div class="small muted mono">${base}</div>
+      <div class="opt">${b.opts.map(x=>`<button data-b="${b.id}" data-k="${x.k}" class="${x.k===o.k?'on':''}">${esc(x.label)}</button>`).join('')}</div></td>
+      <td class="num muted">${eur(mn)}</td><td class="num"><b>${eur(es)}</b></td><td class="num muted">${eur(mx)}</td>`;
+    tb.appendChild(tr);
+  });
+  const cMin=sMin*cont,cEst=sEst*cont,cMax=sMax*cont;
+  tb.insertAdjacentHTML('beforeend',`<tr><td><b>Contingencia ${B.cont} %</b></td><td class="small">Tesorería</td><td class="small muted">Imprevistos: reimpresiones, más inscritos de los previstos</td><td class="num muted">${eur(cMin)}</td><td class="num"><b>${eur(cEst)}</b></td><td class="num muted">${eur(cMax)}</td></tr>
+  <tr class="total"><td colspan="3">TOTAL</td><td class="num">${eur(sMin+cMin)}</td><td class="num">${eur(sEst+cEst)}</td><td class="num">${eur(sMax+cMax)}</td></tr>`);
+  tb.querySelectorAll('.opt button').forEach(x=>x.addEventListener('click',()=>write('budget/opts/'+x.dataset.b,x.dataset.k)));
+  $('#kTotal').textContent=eur(sEst+cEst);$('#kPer').textContent=eur((sEst+cEst)/n)+'/p';
+  $('#kMin').textContent=eur(sMin+cMin);$('#kMax').textContent=eur(sMax+cMax);
+  if(document.activeElement!==$('#nPart'))$('#nPart').value=n;
+  if(document.activeElement!==$('#nPodios'))$('#nPodios').value=np;
+  if(document.activeElement!==$('#contPct'))$('#contPct').value=+B.cont||0;
+  $('#nPartVal').textContent=n;$('#contVal').textContent=(+B.cont||0)+' %';
+}
+$('#nPart').addEventListener('input',e=>{$('#nPartVal').textContent=e.target.value;});
+$('#nPart').addEventListener('change',e=>write('budget/nPart',+e.target.value));
+$('#nPodios').addEventListener('change',e=>write('budget/nPodios',Math.max(1,+e.target.value||1)));
+$('#contPct').addEventListener('input',e=>{$('#contVal').textContent=e.target.value+' %';});
+$('#contPct').addEventListener('change',e=>write('budget/cont',+e.target.value));
+
+/* ================= TIMELINE ================= */
+const fmt=d=>d.toLocaleDateString('es-ES',{day:'2-digit',month:'short'});
+function renderTimeline(){
+  const box=$('#tl');box.innerHTML='';
+  const ed=eventDate();const has=!!ed;const D=has?new Date(ed+'T12:00:00'):null;
+  const today=new Date();today.setHours(12,0,0,0);
+  $('#tlDate').textContent=has?D.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'fecha por definir';
+  $('#termDate').textContent=has?`"${ed}"`:'"por definir"';
+  if(has){const days=Math.round((D-today)/86400000);$('#statDays').textContent=days>=0?days:'✔';}else $('#statDays').textContent='—';
+  if(document.activeElement!==$('#eventDate'))$('#eventDate').value=ed;
+  let nowSet=false;
+  TIMELINE.forEach(t=>{
+    const el=document.createElement('div');el.className='tl-item'+(t.dday?' dday':'');
+    let dateTxt='';
+    if(has){const s=new Date(D);s.setDate(D.getDate()+t.w*7);const e=new Date(s);e.setDate(s.getDate()+6);
+      dateTxt=t.dday?fmt(D):`${fmt(s)} → ${fmt(e)}`;
+      if(t.dday?D<today:e<today)el.classList.add('past');
+      else if(!nowSet&&(t.dday?D>=today:s<=today&&today<=e)){el.classList.add('now');nowSet=true;}
+      else if(!nowSet&&s>today){el.classList.add('now');nowSet=true;}}
+    el.innerHTML=`<div class="tl-head"><span class="t">${t.w===0?'DÍA D':(t.w>0?'T+'+t.w:'T'+t.w)} sem</span><h3>${esc(t.title)}</h3><span class="d">${dateTxt}</span></div>
+      <ul>${t.items.map(i=>`<li><b>${esc(i[0])}:</b> ${esc(i[1])}</li>`).join('')}</ul>`;
+    box.appendChild(el);
+  });
+}
+$('#eventDate').addEventListener('change',e=>write('date',e.target.value,'fecha publicada para todo el equipo'));
+
+/* ================= QUIÉN SOY / EQUIPO ================= */
+function renderMeStatus(){
+  const st=$('#meStatus');const nm=local.name.trim();const m=me();
+  st.classList.remove('dirty');
+  if(!nm){st.textContent='elígete en la lista o escribe tu nombre y marca tus roles';return;}
+  if(m&&sameSet(rolesOf(m),draft)){st.textContent='guardado en el equipo como "'+m.name+'"';return;}
+  st.textContent=m?'cambios sin guardar':'todavía no estás en el equipo: pulsa guardar';st.classList.add('dirty');
+}
+function renderChips(){
+  const box=$('#roleChips');
+  box.innerHTML=ROLES.map(r=>`<label class="chip${draft.includes(r.id)?' on':''}"><input type="checkbox" id="chip-${r.id}" data-r="${r.id}" ${draft.includes(r.id)?'checked':''}>${esc(r.name)}</label>`).join('');
+  box.querySelectorAll('input').forEach(c=>c.addEventListener('change',e=>{
+    const id=e.target.dataset.r;draft=e.target.checked?[...new Set([...draft,id])]:draft.filter(x=>x!==id);
+    renderChips();renderMeStatus();
+  }));
+}
+function renderPick(){
+  const sel=$('#pickMe');const ms=members();const cur=me();
+  sel.innerHTML='<option value="">'+(ms.length?'Ya estoy en el equipo: soy...':'Aún no hay nadie en el equipo')+'</option>'+ms.map(m=>`<option value="${esc(m.name)}"${cur&&cur.name===m.name?' selected':''}>${esc(m.name)} · ${rolesOf(m).map(id=>(ROLES.find(x=>x.id===id)||{name:id}).name).join(', ')||'sin roles'}</option>`).join('');
+  sel.disabled=!ms.length;
+}
+function renderTeam(){
+  const box=$('#team');const ms=members();
+  $('#teamCount').textContent=ms.length;
+  if(!ms.length){box.innerHTML='<p class="small muted">Nadie se ha apuntado todavía. Escribe tu nombre, marca tus roles y pulsa "guardar en el equipo".</p>';return;}
+  box.innerHTML=ms.map(m=>`<div class="member"><span class="n${m.name===local.name?' me':''}">${esc(m.name)}</span><span class="r">${rolesOf(m).map(id=>{const r=ROLES.find(x=>x.id===id);return r?`<span class="pill${r.proposed?' warn':''}">${esc(r.name)}</span>`:'';}).join('')||'<span class="small muted">sin roles</span>'}</span><button class="x" data-n="${esc(m.name)}" title="quitar del equipo">quitar</button></div>`).join('');
+  box.querySelectorAll('.x').forEach(b=>b.addEventListener('click',()=>{
+    if(!confirm('¿Quitar a '+b.dataset.n+' del equipo?'))return;
+    write('members/'+slug(b.dataset.n),null,'quitado del equipo');
+  }));
+}
+$('#pickMe').addEventListener('change',e=>{
+  const m=members().find(x=>x.name===e.target.value);if(!m)return;
+  local.name=m.name;saveLocal();draft=[...rolesOf(m)];renderAll();
+  toast('hola, '+m.name+': tus roles ya están cargados en este dispositivo');
+});
+$('#myName').addEventListener('input',e=>{
+  local.name=e.target.value;saveLocal();
+  const m=me();if(m)draft=[...rolesOf(m)];
+  renderChips();renderRoles();renderTeam();renderPick();renderMeStatus();
+});
+$('#btnSaveMe').addEventListener('click',()=>{
+  const nm=local.name.trim();
+  if(!nm){toast('escribe tu nombre primero');$('#myName').focus();return;}
+  if(!draft.length&&!confirm('No has marcado ningún rol. ¿Guardar igualmente?'))return;
+  local.name=nm;saveLocal();
+  write('members/'+slug(nm),{name:nm,roles:[...draft],updatedAt:Date.now()},'guardado: todo el equipo lo ve ya');
+});
+
+/* ================= PENDIENTES / NOTAS ================= */
+$('#questions').innerHTML=QUESTIONS.map(q=>`<div class="q"><span class="who">${esc(q[0])}</span><span>${esc(q[1])}</span></div>`).join('');
+let notesTimer=null;
+$('#notes').addEventListener('input',e=>{
+  clearTimeout(notesTimer);
+  notesTimer=setTimeout(()=>write('notes',e.target.value),900);
+});
+$('#btnReset').addEventListener('click',()=>{if(confirm('¿Desmarcar TODAS las tareas para todo el equipo?'))write('done',null,'casillas reiniciadas');});
+
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2200);}
+
+/* ================= NAV ================= */
+const links=[...document.querySelectorAll('nav.tabs a')];
+const secs=links.map(a=>document.querySelector(a.getAttribute('href')));
+function syncNav(){let cur=0;secs.forEach((s,i)=>{if(s.getBoundingClientRect().top<120)cur=i;});links.forEach((a,i)=>a.classList.toggle('active',i===cur));}
+addEventListener('scroll',syncNav,{passive:true});
+
+function renderAll(){
+  if(document.activeElement!==$('#myName'))$('#myName').value=local.name||'';
+  if(document.activeElement!==$('#notes'))$('#notes').value=S.notes||'';
+  renderChips();renderTeam();renderPick();renderMeStatus();renderRoles();renderGlobal();renderBudget();renderTimeline();syncNav();
+}
+renderAll();setConn();
+connectFirebase();
+</script>
+
+</body>
+</html>
